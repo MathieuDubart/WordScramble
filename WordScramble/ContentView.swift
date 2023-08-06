@@ -11,6 +11,7 @@ struct ContentView: View {
     @State private var usedWords = [String]()
     @State private var rootWord = "" //the one they're spelling from eight letter word
     @State private var newWord = "" //bind to text field to store word while typing
+    @State private var score = 0
     
     @State private var errorTitle = ""
     @State private var errorMessage = ""
@@ -24,6 +25,8 @@ struct ContentView: View {
                         .autocapitalization(.none)
                 }
                 
+                Text("Your score: \(score)")
+                
                 Section {
                     ForEach(usedWords, id: \.self) { word in
                         HStack {
@@ -35,6 +38,10 @@ struct ContentView: View {
             }
             .navigationTitle(rootWord)
             .navigationBarTitleDisplayMode(.large)
+            .toolbar() {
+                Button("Restart game", action: startGame)
+                    .foregroundColor(.red)
+            }
             .onSubmit(addNewWord)
             .onAppear(perform: startGame)
         }
@@ -47,7 +54,7 @@ struct ContentView: View {
     
     func addNewWord() {
         let answer = newWord.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-        guard answer.count > 0 else { return }
+        guard answer.count > 3 && answer != rootWord else { return }
         
         guard !isAlreadyUsed(word: answer) else {
             wordError(title: "World already used", message: "Try an other word")
@@ -64,6 +71,8 @@ struct ContentView: View {
             return
         }
         
+        calculateScore(word: answer)
+        usedWords.insert(answer, at: 0)
         newWord = ""
     }
     
@@ -109,6 +118,10 @@ struct ContentView: View {
         errorTitle = title
         errorMessage = message
         showingError = true
+    }
+    
+    func calculateScore(word: String) {
+        score += word.count
     }
 }
 
